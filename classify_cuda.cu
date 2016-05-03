@@ -60,6 +60,7 @@ void trainLogRegKernel(
             weights[i] = 0.01;
         }
         *errors = 1.0;
+        __syncthreads();
     }
 }
 
