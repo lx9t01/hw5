@@ -58,7 +58,7 @@ cudaEvent_t stop;
 // Start non boilerplate code
 
 // Fills output with standard normal data
-void gaussianFill(float *output, int size) {
+void gaussianFill(float *output, int size) { // size = 2048
     // seed generator to 2015
     std::default_random_engine generator(2015);
     std::normal_distribution<float> distribution(0.0, 0.1);
@@ -69,31 +69,70 @@ void gaussianFill(float *output, int size) {
 
 // Takes a string of comma seperated floats and stores the float values into
 // output. Each string should consist of REVIEW_DIM + 1 floats.
-void readLSAReview(string review_str, float *output, int stride) {
+void readLSAReview(string review_str, float *output, int stride) { 
     stringstream stream(review_str);
     int component_idx = 0;
 
     for (string component; getline(stream, component, ','); component_idx++) {
         output[stride * component_idx] = atof(component.c_str());
     }
-    assert(component_idx == REVIEW_DIM + 1);
+    assert(component_idx == REVIEW_DIM + 1); 
 }
 
 void classify(istream& in_stream, int batch_size) {
     // TODO: randomly initialize weights. allocate and initialize buffers on
     //       host & device. allocate and initialize streams
+    float* weights = (float*) malloc (REVIEW_DIM * sizeof(float));
+    gaussianFill (weights, REVIEW_DIM);
+    // float* dev_weights;
+    // cudaMalloc(&dev_weights, REVIEW_DIM * sizeof(float));
+
+
+    // number of streams = 2
+    const int num_streams = 2;
+    // buffers & streams
+    float* dev_data[num_streams];
+    float* host_data[num_streams];
+    float* host_error[num_streams];
+    cudaStream_t s[num_streams];
+    for (int i = 0; i < num_streams; ++i) {
+        cudaStreamCreate(&s[i]);
+        cudaMalloc(&dev_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float));
+        dev_data[i] = (float*)malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
+        host_error[i] = (float*)malloc(sizeof(float));
+    }
 
     // main loop to process input lines (each line corresponds to a review)
     int review_idx = 0;
     for (string review_str; getline(in_stream, review_str); review_idx++) {
         // TODO: process review_str with readLSAReview
-
-        // TODO: if you have filled up a batch, copy H->D, call kernel and copy
-        //      D->H all in a stream
+        for (int i = 0; i < num_streams; ++i) {
+            readLSAReview(review_str, host_data[i][review_idx], 1)； // what is the stride here = 1
+            // TODO: if you have filled up a batch, copy H->D, call kernel and copy
+            if (review_idx >= batch_size - 1) {
+            // copy from host to device
+                cudaMemcpyAsync(dev_data[i], host_data[i], 
+                    batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[i]);
+                host_error[i] = cudaClassify(dev_data, batch_size, 1.0, weights, s[i]);
+                review_idx = 0;
+                //      D->H all in a stream
+                printf("error rate: %f\n", host_error[i]);
+            }
+        }
+        
     }
 
     // TODO: print out weights
+    for (int i = 0; i < REVIEW_DIM; ++i) {
+        printf("%f ", weight[i]);
+    }
+    printf("\n");
     // TODO: free all memory
+
+    for (int i = 0; i < num_streams; ++i) {
+        cudaStreamSynchronize(s[i]);
+        cudaStreamDestroy(s[i]);
+    }
 }
 
 int main(int argc, char** argv) {
