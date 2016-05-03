@@ -120,6 +120,10 @@ void classify(istream& in_stream, int batch_size) {
         }
         
     }
+    for (int i = 0; i < num_streams; ++i) {
+        cudaStreamSynchronize(s[i]);
+        cudaStreamDestroy(s[i]);
+    }
 
     // TODO: print out weights
     for (int i = 0; i < REVIEW_DIM; ++i) {
@@ -127,11 +131,11 @@ void classify(istream& in_stream, int batch_size) {
     }
     printf("\n");
     // TODO: free all memory
-
-    for (int i = 0; i < num_streams; ++i) {
-        cudaStreamSynchronize(s[i]);
-        cudaStreamDestroy(s[i]);
-    }
+    free(weights);
+    cudaFree(dev_weights);
+    cudaFree(dev_data);
+    free(host_data);
+    
 }
 
 int main(int argc, char** argv) {
