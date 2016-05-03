@@ -115,7 +115,7 @@ void classify(istream& in_stream, int batch_size) {
             review_idx = 0;
             //      D->H all in a stream
             printf("error rate at stream 0: %f\n", host_error[0]);
-            flag == 1;
+            flag = 1;
         }
         if ((review_idx >= batch_size - 1) && (flag == 1)) {
         // copy from host to device
@@ -124,7 +124,7 @@ void classify(istream& in_stream, int batch_size) {
             review_idx = 0;
             //      D->H all in a stream
             printf("error rate at stream 1: %f\n", host_error[1]);
-            flag == 0;
+            flag = 0;
         }
         
     }
@@ -134,7 +134,7 @@ void classify(istream& in_stream, int batch_size) {
     }
     gpuErrChk(cudaMemcpy(weights, dev_weights, REVIEW_DIM * sizeof(float), cudaMemcpyDeviceToHost));
     // TODO: print out weights
-    printf("weights:\n")
+    printf("weights:\n");
     for (int i = 0; i < REVIEW_DIM; ++i) {
         printf("%f ", weights[i]);
     }
