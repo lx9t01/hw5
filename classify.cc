@@ -107,7 +107,7 @@ void classify(istream& in_stream, int batch_size) {
     for (string review_str; getline(in_stream, review_str); review_idx++) {
         // TODO: process review_str with readLSAReview
         for (int i = 0; i < num_streams; ++i) {
-            readLSAReview(review_str, host_data[i][review_idx], 1); // what is the stride here = 1
+            readLSAReview(review_str, host_data[i] + review_idx, 1); // what is the stride here = 1
             // TODO: if you have filled up a batch, copy H->D, call kernel and copy
             if (review_idx >= batch_size - 1) {
             // copy from host to device
