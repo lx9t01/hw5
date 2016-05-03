@@ -84,6 +84,11 @@ void classify(istream& in_stream, int batch_size) {
     //       host & device. allocate and initialize streams
     float* weights = (float*) malloc (REVIEW_DIM * sizeof(float));
     gaussianFill (weights, REVIEW_DIM);
+    printf("original weights:\n");
+    for (int i = 0; i < REVIEW_DIM; ++i) {
+        printf("%f ", weights[i]);
+    }
+    printf("\n");
     float* dev_weights;
     gpuErrChk(cudaMalloc((void**)&dev_weights, REVIEW_DIM * sizeof(float)));
     gpuErrChk(cudaMemcpy(dev_weights, weights, REVIEW_DIM * sizeof(float), cudaMemcpyHostToDevice));
