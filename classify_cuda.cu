@@ -25,7 +25,44 @@ void trainLogRegKernel(
 	float *weights,
     float *errors)
 {
-    
+    unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
+    float wx[2048];
+    float denom[2048];
+    while (thread_index < batch_size) {
+        wx[thread_index] = 0.0;
+        __syncthreads();
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            wx[thread_index] += weights[i] * data[thread_index * REVIEW_DIM + i];
+        }
+        __syncthreads();
+        denom[thread_index] = 1.0 + \ 
+            exp (data[thread_index * REVIEW_DIM + REVIEW_DIM] * wx[thread_index]);
+        __syncthreads();
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            data[thread_index * REVIEW_DIM + i] = data[thread_index * REVIEW_DIM + REVIEW_DIM] * \ 
+                data[thread_index * REVIEW_DIM + i] / denom[thread_index] / batch_size;
+        }
+        __syncthreads();
+        thread_index += gridDim.x * blockDim.x;
+    }
+
+    int l = batch_size;
+    while (l > 1) {
+        l /= 2;
+        for (j = 0; j < REVIEW_DIM; ++j) {
+            if (thread_index < l) {
+                data[thread_index * REVIEW_DIM + j] = \
+                    data[thread_index * REVIEW_DIM + j] + data[(thread_index + l) * REVIEW_DIM + j];
+            }
+        }
+        __syncthreads();
+    }
+    if (thread_index == 0) {
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            weights[i] = data[i];
+        }
+        *errors = 1.0;
+    }
 }
 
 /*
@@ -34,11 +71,11 @@ void trainLogRegKernel(
  * minibatch. This error should go down as more training occurs.
  */
 float cudaClassify(
-    float *data,
-    int batch_size, 
-    float step_size,
-    float *weights, 
-    cudaStream_t stream)
+    float *data, // dev_data[0,1]
+    int batch_size, // batch_size = 2048
+    float step_size, // step_size = 1.0
+    float *weights,  // dev_weights
+    cudaStream_t stream) // s[0,1]
 {
     int block_size = (batch_size < 1024) ? batch_size : 1024;
 
