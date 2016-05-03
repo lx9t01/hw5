@@ -25,7 +25,7 @@ void trainLogRegKernel(
 	float *weights,
     float *errors)
 {
-    // TODO: write me
+    
 }
 
 /*

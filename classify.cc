@@ -80,7 +80,7 @@ void readLSAReview(string review_str, float *output, int stride) {
 }
 
 void classify(istream& in_stream, int batch_size) {
-    // TODO: randomly initialize weights. allocate and initialize buffers on
+    // TODO ok: randomly initialize weights. allocate and initialize buffers on
     //       host & device. allocate and initialize streams
     float* weights = (float*) malloc (REVIEW_DIM * sizeof(float));
     gaussianFill (weights, REVIEW_DIM);
@@ -93,49 +93,58 @@ void classify(istream& in_stream, int batch_size) {
     const int num_streams = 2;
     // buffers & streams
     float* dev_data[num_streams];
-    float* host_data[num_streams];
+    float* host_data = (float*)malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));;
     float host_error[num_streams];
     cudaStream_t s[num_streams];
     for (int i = 0; i < num_streams; ++i) {
         gpuErrChk(cudaStreamCreate(&s[i]));
         gpuErrChk(cudaMalloc((void**)&dev_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float)));
-        host_data[i] = (float*)malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
     }
 
     // main loop to process input lines (each line corresponds to a review)
     int review_idx = 0;
+    int flag = 0;
     for (string review_str; getline(in_stream, review_str); review_idx++) {
-        // TODO: process review_str with readLSAReview
-        for (int i = 0; i < num_streams; ++i) {
-            readLSAReview(review_str, host_data[i] + review_idx, 1); // what is the stride here = 1
-            // TODO: if you have filled up a batch, copy H->D, call kernel and copy
-            if (review_idx >= batch_size - 1) {
-            // copy from host to device
-                gpuErrChk(cudaMemcpyAsync(dev_data[i], host_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[i]));
-                host_error[i] = cudaClassify(dev_data[i], batch_size, 1.0, weights, s[i]);
-                review_idx = 0;
-                //      D->H all in a stream
-                printf("error rate at stream %d: %f\n", i, host_error[i]);
-            }
+        // TODO ok: process review_str with readLSAReview
+        readLSAReview(review_str, host_data + review_idx * (REVIEW_DIM + 1), 1); // what is the stride here = 1
+        // TODO ok: if you have filled up a batch, copy H->D, call kernel and copy
+        if ((review_idx >= batch_size - 1) && (flag == 0)) {
+        // copy from host to device
+            gpuErrChk(cudaMemcpyAsync(dev_data[0], host_data, batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[0]));
+            host_error[0] = cudaClassify(dev_data[0], batch_size, 1.0, dev_weights, s[0]);
+            review_idx = 0;
+            //      D->H all in a stream
+            printf("error rate at stream 0: %f\n", host_error[0]);
+            flag == 1;
+        }
+        if ((review_idx >= batch_size - 1) && (flag == 1)) {
+        // copy from host to device
+            gpuErrChk(cudaMemcpyAsync(dev_data[1], host_data, batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[1]));
+            host_error[1] = cudaClassify(dev_data[1], batch_size, 1.0, dev_weights, s[1]);
+            review_idx = 0;
+            //      D->H all in a stream
+            printf("error rate at stream 1: %f\n", host_error[1]);
+            flag == 0;
         }
         
     }
     for (int i = 0; i < num_streams; ++i) {
-        cudaStreamSynchronize(s[i]);
-        cudaStreamDestroy(s[i]);
+        gpuErrChk(cudaStreamSynchronize(s[i]));
+        gpuErrChk(cudaStreamDestroy(s[i]));
     }
-
+    gpuErrChk(cudaMemcpy(weights, dev_weights, REVIEW_DIM * sizeof(float), cudaMemcpyDeviceToHost));
     // TODO: print out weights
+    printf("weights:\n")
     for (int i = 0; i < REVIEW_DIM; ++i) {
         printf("%f ", weights[i]);
     }
     printf("\n");
     // TODO: free all memory
     free(weights);
-    cudaFree(dev_weights);
+    gpuErrChk(cudaFree(dev_weights));
+    free(host_data);
     for (int i = 0; i < REVIEW_DIM; ++i) {
-        cudaFree(dev_data[i]);
-        free(host_data[i]);
+        gpuErrChk(cudaFree(dev_data[i]));
     }
     
 }
