@@ -65,7 +65,7 @@ void trainLogRegKernel(
     for (int i = 0; i < REVIEW_DIM; ++i) {
         weights[i] = weights[i] - step_size * temp[i];
     }
-    *errors = losslog[0];    
+    *errors = 1.0;    
 }
 
 /*
