@@ -107,7 +107,7 @@ void classify(istream& in_stream, int batch_size) {
     for (string review_str; getline(in_stream, review_str); review_idx++) {
         // TODO: process review_str with readLSAReview
         for (int i = 0; i < num_streams; ++i) {
-            readLSAReview(review_str, host_data[i][review_idx], 1)； // what is the stride here = 1
+            readLSAReview(review_str, host_data[i][review_idx], 1); // what is the stride here = 1
             // TODO: if you have filled up a batch, copy H->D, call kernel and copy
             if (review_idx >= batch_size - 1) {
             // copy from host to device
@@ -116,7 +116,7 @@ void classify(istream& in_stream, int batch_size) {
                 host_error[i] = cudaClassify(dev_data, batch_size, 1.0, weights, s[i]);
                 review_idx = 0;
                 //      D->H all in a stream
-                printf("error rate: %f\n", host_error[i]);
+                printf("error rate at stream %d: %f\n", i, host_error[i]);
             }
         }
         
@@ -124,7 +124,7 @@ void classify(istream& in_stream, int batch_size) {
 
     // TODO: print out weights
     for (int i = 0; i < REVIEW_DIM; ++i) {
-        printf("%f ", weight[i]);
+        printf("%f ", weights[i]);
     }
     printf("\n");
     // TODO: free all memory
