@@ -98,8 +98,7 @@ void classify(istream& in_stream, int batch_size) {
     for (int i = 0; i < num_streams; ++i) {
         cudaStreamCreate(&s[i]);
         cudaMalloc(&dev_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float));
-        dev_data[i] = (float*)malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
-        host_error[i] = (float*)malloc(sizeof(float));
+        host_data[i] = (float*)malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
     }
 
     // main loop to process input lines (each line corresponds to a review)
