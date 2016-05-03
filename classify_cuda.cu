@@ -55,11 +55,12 @@ void trainLogRegKernel(
         }
         __syncthreads();
     }
-        for (int i = 0; i < REVIEW_DIM; ++i) {
-            weights[i] = 0.01;
-        }
-        *errors = 1.0;
-        __syncthreads();
+
+    for (int i = 0; i < REVIEW_DIM; ++i) {
+        weights[i] = data[i];
+    }
+    *errors = 1.0;
+    __syncthreads();
     
 }
 
