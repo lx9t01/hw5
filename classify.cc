@@ -133,8 +133,10 @@ void classify(istream& in_stream, int batch_size) {
     // TODO: free all memory
     free(weights);
     cudaFree(dev_weights);
-    cudaFree(dev_data);
-    free(host_data);
+    for (int i = 0; i < REVIEW_DIM; ++i) {
+        cudaFree(dev_data[i]);
+        free(host_data[i]);
+    }
     
 }
 
