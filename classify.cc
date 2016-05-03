@@ -93,7 +93,7 @@ void classify(istream& in_stream, int batch_size) {
     // buffers & streams
     float* dev_data[num_streams];
     float* host_data[num_streams];
-    float* host_error[num_streams];
+    float host_error[num_streams];
     cudaStream_t s[num_streams];
     for (int i = 0; i < num_streams; ++i) {
         cudaStreamCreate(&s[i]);
