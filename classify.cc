@@ -84,8 +84,9 @@ void classify(istream& in_stream, int batch_size) {
     //       host & device. allocate and initialize streams
     float* weights = (float*) malloc (REVIEW_DIM * sizeof(float));
     gaussianFill (weights, REVIEW_DIM);
-    // float* dev_weights;
-    // cudaMalloc(&dev_weights, REVIEW_DIM * sizeof(float));
+    float* dev_weights;
+    gpuErrChk(cudaMalloc((void**)&dev_weights, REVIEW_DIM * sizeof(float))）;
+    gpuErrChk(cudaMemcpy(dev_weights, weights, REVIEW_DIM * sizeof(float), cudaMemcpyHostToDevice));
 
 
     // number of streams = 2
@@ -96,8 +97,8 @@ void classify(istream& in_stream, int batch_size) {
     float host_error[num_streams];
     cudaStream_t s[num_streams];
     for (int i = 0; i < num_streams; ++i) {
-        cudaStreamCreate(&s[i]);
-        cudaMalloc(&dev_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float));
+        gpuErrChk(cudaStreamCreate(&s[i]));
+        gpuErrChk(cudaMalloc((void**)&dev_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float)));
         host_data[i] = (float*)malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
     }
 
@@ -110,8 +111,7 @@ void classify(istream& in_stream, int batch_size) {
             // TODO: if you have filled up a batch, copy H->D, call kernel and copy
             if (review_idx >= batch_size - 1) {
             // copy from host to device
-                cudaMemcpyAsync(dev_data[i], host_data[i], 
-                    batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[i]);
+                gpuErrChk(cudaMemcpyAsync(dev_data[i], host_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[i]));
                 host_error[i] = cudaClassify(dev_data, batch_size, 1.0, weights, s[i]);
                 review_idx = 0;
                 //      D->H all in a stream
