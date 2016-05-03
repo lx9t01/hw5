@@ -35,12 +35,10 @@ void trainLogRegKernel(
             wx[thread_index] += weights[i] * data[thread_index * REVIEW_DIM + i];
         }
         __syncthreads();
-        denom[thread_index] = 1.0 + \ 
-            exp (data[thread_index * REVIEW_DIM + REVIEW_DIM] * wx[thread_index]);
+        denom[thread_index] = 1.0 + exp (data[thread_index * REVIEW_DIM + REVIEW_DIM] * wx[thread_index]);
         __syncthreads();
         for (int i = 0; i < REVIEW_DIM; ++i) {
-            data[thread_index * REVIEW_DIM + i] = data[thread_index * REVIEW_DIM + REVIEW_DIM] * \ 
-                data[thread_index * REVIEW_DIM + i] / denom[thread_index] / batch_size;
+            data[thread_index * REVIEW_DIM + i] = data[thread_index * REVIEW_DIM + REVIEW_DIM] * data[thread_index * REVIEW_DIM + i] / denom[thread_index] / batch_size;
         }
         __syncthreads();
         thread_index += gridDim.x * blockDim.x;
@@ -49,7 +47,7 @@ void trainLogRegKernel(
     int l = batch_size;
     while (l > 1) {
         l /= 2;
-        for (j = 0; j < REVIEW_DIM; ++j) {
+        for (int j = 0; j < REVIEW_DIM; ++j) {
             if (thread_index < l) {
                 data[thread_index * REVIEW_DIM + j] = \
                     data[thread_index * REVIEW_DIM + j] + data[(thread_index + l) * REVIEW_DIM + j];
