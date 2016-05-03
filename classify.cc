@@ -112,7 +112,7 @@ void classify(istream& in_stream, int batch_size) {
             if (review_idx >= batch_size - 1) {
             // copy from host to device
                 gpuErrChk(cudaMemcpyAsync(dev_data[i], host_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[i]));
-                host_error[i] = cudaClassify(dev_data, batch_size, 1.0, weights, s[i]);
+                host_error[i] = cudaClassify(dev_data[i], batch_size, 1.0, weights, s[i]);
                 review_idx = 0;
                 //      D->H all in a stream
                 printf("error rate at stream %d: %f\n", i, host_error[i]);
