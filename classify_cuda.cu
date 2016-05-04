@@ -81,7 +81,7 @@ void trainLogRegKernel(
     }
     if (threadIdx.x == 0) {
         
-        *errors = er / batch_size;
+        *errors = *er / batch_size;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             weights[i] -= step_size * temp[i];
         // printf("%f\n", weights[i]);
