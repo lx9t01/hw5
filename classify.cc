@@ -98,45 +98,60 @@ void classify(istream& in_stream, int batch_size) {
     const int num_streams = 2;
     // buffers & streams
     float* dev_data[num_streams];
-    float* host_data = (float*)malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));;
+    float* host_data[num_streams];
     float host_error[num_streams];
     cudaStream_t s[num_streams];
     for (int i = 0; i < num_streams; ++i) {
+        host_data[i] = (float*) malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
         gpuErrChk(cudaStreamCreate(&s[i]));
         gpuErrChk(cudaMalloc((void**)&dev_data[i], batch_size * (REVIEW_DIM + 1) * sizeof(float)));
     }
     
     // main loop to process input lines (each line corresponds to a review)
     int review_idx = 0;
-    int flag = 0;
+    // int flag = 0;
 	// cout <<"out of loop"<< endl;
     for (string review_str; getline(in_stream, review_str); review_idx++) {
         // TODO ok: process review_str with readLSAReview
         // printf("show me at read\n");
         // cout << "i am here!" << endl;
-        readLSAReview(review_str, host_data + review_idx * (REVIEW_DIM + 1), 1); // what is the stride here = 1
+        if (review_idx >= 0 && review_idx < batch_size)
+            readLSAReview(review_str, host_data[0] + review_idx * (REVIEW_DIM + 1), 1); // what is the stride here = 1
         // TODO ok: if you have filled up a batch, copy H->D, call kernel and copy
-        if ((review_idx >= batch_size - 1) && (flag == 0)) {
+        if (review_idx == batch_size - 1) {
         // copy from host to device
-            
-            gpuErrChk(cudaMemcpyAsync(dev_data[0], host_data, batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[0]));
+            gpuErrChk(cudaMemcpyAsync(dev_data[0], host_data[0], batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[0]));
+            // printf("show me 0\n");
+            host_error[0] = cudaClassify(dev_data[0], batch_size, 1.0, dev_weights, s[0]);
+            // review_idx = 0;
+            //      D->H all in a stream
+            printf("error rate at stream 0: %f\n", host_error[0]);
+            // flag = 1;
+        }
+        if (review_idx >= batch_size  && review_idx < 2 * batch_size)
+            readLSAReview(review_str, host_data[0] + review_idx * (REVIEW_DIM + 1), 1); // what is the stride here = 1
+        // TODO ok: if you have filled up a batch, copy H->D, call kernel and copy
+        if (review_idx == 2 * batch_size - 1) {
+        // copy from host to device
+            gpuErrChk(cudaMemcpyAsync(dev_data[0], host_data[0], batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[0]));
             // printf("show me 0\n");
             host_error[0] = cudaClassify(dev_data[0], batch_size, 1.0, dev_weights, s[0]);
             review_idx = 0;
             //      D->H all in a stream
             printf("error rate at stream 0: %f\n", host_error[0]);
-            flag = 1;
+            // flag = 1;
         }
-        if ((review_idx >= batch_size - 1) && (flag == 1)) {
-        // copy from host to device
-            gpuErrChk(cudaMemcpyAsync(dev_data[1], host_data, batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[1]));
-            // printf("show me 1\n");
-            host_error[1] = cudaClassify(dev_data[1], batch_size, 1.0, dev_weights, s[1]);
-            review_idx = 0;
-            //      D->H all in a stream
-            printf("error rate at stream 1: %f\n", host_error[1]);
-            flag = 0;
-        }
+
+        // if ((review_idx >= batch_size - 1) && (flag == 1)) {
+        // // copy from host to device
+        //     gpuErrChk(cudaMemcpyAsync(dev_data[1], host_data, batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[1]));
+        //     // printf("show me 1\n");
+        //     host_error[1] = cudaClassify(dev_data[1], batch_size, 1.0, dev_weights, s[1]);
+        //     review_idx = 0;
+        //     //      D->H all in a stream
+        //     printf("error rate at stream 1: %f\n", host_error[1]);
+        //     flag = 0;
+        // }
         
     }
     for (int i = 0; i < num_streams; ++i) {
