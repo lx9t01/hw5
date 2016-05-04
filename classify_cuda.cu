@@ -48,8 +48,14 @@ void trainLogRegKernel(
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
         }
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
-        gradient[threadIdx.x] = (-1.0/batch_size * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            gradient[threadIdx.x] = (-1.0/batch_size * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
         
+
+
+
+
+        }
         // printf("%f\n", wx);
         
         // if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
