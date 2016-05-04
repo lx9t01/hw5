@@ -35,6 +35,7 @@ void trainLogRegKernel(
         __syncthreads();
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx[thread_index] += weights[i] * data[thread_index * REVIEW_DIM + i];
+            printf("wx: %f\n", wx[thread_index]);
         }
         __syncthreads();
         denom[thread_index] = 1.0 + exp (data[thread_index * REVIEW_DIM + REVIEW_DIM] * wx[thread_index]);
