@@ -46,8 +46,6 @@ void trainLogRegKernel(
         }
 
         thread_index += gridDim.x * blockDim.x;
-    }
-    if (threadIdx.x == 0) {
         for (int i = 0; i < REVIEW_DIM; ++i) {
             weights[i] = gradient[i];
             printf("%f\n", weights[i]);
