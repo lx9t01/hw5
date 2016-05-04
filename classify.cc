@@ -111,6 +111,7 @@ void classify(istream& in_stream, int batch_size) {
     int flag = 0;
     for (string review_str; getline(in_stream, review_str); review_idx++) {
         // TODO ok: process review_str with readLSAReview
+        printf("show me at read\n");
         readLSAReview(review_str, host_data + review_idx * (REVIEW_DIM + 1), 1); // what is the stride here = 1
         // TODO ok: if you have filled up a batch, copy H->D, call kernel and copy
         if ((review_idx >= batch_size - 1) && (flag == 0)) {
