@@ -47,7 +47,7 @@ void trainLogRegKernel(
 
         thread_index += gridDim.x * blockDim.x;
         for (int i = 0; i < REVIEW_DIM; ++i) {
-            weights[i] = gradient[i];
+            weights[i] -= step_size * gradient[i];
             printf("%f\n", weights[i]);
         }
         *errors = 1.0;
