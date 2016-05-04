@@ -89,14 +89,14 @@ float cudaClassify(
     float *d_errors;
     cudaMalloc(&d_errors, sizeof(float));
     cudaMemset(d_errors, 0, sizeof(float));
-    // printf("entering kernel\n");
+    printf("entering kernel\n");
     trainLogRegKernel<<<grid_size, block_size, shmem_bytes, stream>>>(
         data,
         batch_size,
         step_size,
         weights,
         d_errors);
-
+    printf("leaving kernel\n");
     float h_errors = -1.0;
     cudaMemcpy(&h_errors, d_errors, sizeof(float), cudaMemcpyDefault);
     cudaFree(d_errors);
