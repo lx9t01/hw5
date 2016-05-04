@@ -45,9 +45,8 @@ void trainLogRegKernel(
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
         // float temp[50];
         for (int i = 0; i < REVIEW_DIM; ++i) {
-            float temp = (-1.0/batch_size * \
-                data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
-            // atomicAdd(&gradient[i], temp);      
+            float temp = (-1.0/batch_size * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
+            gradient[i] += temp;      
         }
         *errors = 1.0;
         return;
