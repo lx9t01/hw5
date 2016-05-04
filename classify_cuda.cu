@@ -32,12 +32,28 @@ void trainLogRegKernel(
         float wx = 0.0;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
+            // it's the old prediction
         }
-        printf("wx: %f\n", wx);
-        
+        // printf("wx: %f\n", wx);
+        float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
+        float temp[50];
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            temp[i] = (-1.0/batch_size * \
+                data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
+        }
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            atomicAdd(gradient[i], temp[i]);
+        }
+
         thread_index += gridDim.x * blockDim.x;
     }
-
+    if (threadIdx.x == 0) {
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            weights[i] = gradient[i];
+            printf("%f\n", weights[i]);
+        }
+        *errors = 1.0;
+    }
 
 
 
