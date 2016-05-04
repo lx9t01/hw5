@@ -56,7 +56,7 @@ void trainLogRegKernel(
         thread_index += gridDim.x * blockDim.x;
     }
     if (threadIdx.x == 0) {
-        *errors = 1.0;
+        //*errors = 1.0;
         // *errors = er / batch_size;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             weights[i] -= step_size * gradient[i];
