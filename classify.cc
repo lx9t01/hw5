@@ -98,19 +98,15 @@ void classify(istream& in_stream, int batch_size) {
     const int num_streams = 2;
     // buffers & streams
     float* dev_data0;
+    gpuErrChk(cudaMalloc((void**)&dev_data0, batch_size * (REVIEW_DIM + 1) * sizeof(float)));
     float* dev_data1;
-    float* host_data0;
-    float* host_data1;
+    gpuErrChk(cudaMalloc((void**)&dev_data1, batch_size * (REVIEW_DIM + 1) * sizeof(float)));
+    float* host_data0 = (float*) malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
+    float* host_data1 = (float*) malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
     float host_error[num_streams];
-    host_data0 = (float*) malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
-    host_data1 = (float*) malloc(batch_size * (REVIEW_DIM + 1) * sizeof(float));
     cudaStream_t s[num_streams];
     gpuErrChk(cudaStreamCreate(&s[0]));
     gpuErrChk(cudaStreamCreate(&s[1]));
-    gpuErrChk(cudaMalloc((void**)&dev_data0, batch_size * (REVIEW_DIM + 1) * sizeof(float)));
-    gpuErrChk(cudaMalloc((void**)&dev_data1, batch_size * (REVIEW_DIM + 1) * sizeof(float)));
-    
-    
     // main loop to process input lines (each line corresponds to a review)
     int review_idx = 0;
     // int flag = 0;
