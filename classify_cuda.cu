@@ -31,11 +31,11 @@ void trainLogRegKernel(
     // __shared__ float er;
     while (thread_index < batch_size) {
         float wx = 0.0;
-        *errors = 1.0;
-        return;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
         }
+        *errors = 1.0;
+        return;
         // if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
         //     atomicAdd(&er, 1.0);
         //     // printf("%f\n", er);
