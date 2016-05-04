@@ -27,13 +27,28 @@ void trainLogRegKernel(
 {
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     printf("thread_index: %d\n", thread_index);
+    __shared__ float gradient[50];
+    while (thread_index < batch_size) {
+        float wx = 0.0;
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
+        }
+        printf("wx: %f\n", wx);
+        
+        thread_index += gridDim.x * blockDim.x;
+    }
+
+
+
+
+
     // float wx[2048];
     // float denom[2048];
     // float losslog[2048];
     // float temp[2048 * 50];
 
     // while (thread_index < batch_size) {
-    //     wx[thread_index] = 1.0;
+    //     wx[thread_index] = 0.0;
         
     //     __syncthreads();
     //     for (int i = 0; i < REVIEW_DIM; ++i) {
