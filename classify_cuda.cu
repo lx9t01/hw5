@@ -40,14 +40,14 @@ void trainLogRegKernel(
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     __shared__ float gradient[1024];
     float temp[50];
-    int er;
+    int *er;
     while (thread_index < batch_size) {
         float wx = 0.0;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
         }
         if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
-            atomicAdd(&er, 1);
+            atomicAdd(er, 1);
         }
 
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
@@ -81,7 +81,7 @@ void trainLogRegKernel(
     }
     if (threadIdx.x == 0) {
         
-        *errors = (float)er / batch_size;
+        *errors = (float)(*er) / batch_size;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             weights[i] -= step_size * temp[i];
         // printf("%f\n", weights[i]);
