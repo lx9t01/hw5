@@ -40,12 +40,16 @@ void trainLogRegKernel(
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     __shared__ float gradient[1024];
     float temp[50];
-    
+    float er;
     while (thread_index < batch_size) {
         float wx = 0.0;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
         }
+        if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
+            atomicAdd(&er, 1.0);
+        }
+
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
         for (int i = 0; i < REVIEW_DIM; ++i) {
             float grad_elem = 0.0;
@@ -63,16 +67,6 @@ void trainLogRegKernel(
                 temp[i] += gradient[0];
             }
         }
-        *errors = 2.0;
-        return;
-        // printf("%f\n", wx);
-        
-        // if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
-        //     atomicAdd(&er, 1.0);
-        //     // printf("%f\n", er);
-        // }
-        // printf("wx: %f\n", wx);
-        
         // float temp[50];
         // if (threadIdx.x == 0) {
         //     for (int i = 0; i < REVIEW_DIM; ++i) {
@@ -87,9 +81,9 @@ void trainLogRegKernel(
     }
     if (threadIdx.x == 0) {
         
-        // *errors = er / batch_size;
+        *errors = er / batch_size;
         for (int i = 0; i < REVIEW_DIM; ++i) {
-            weights[i] -= step_size * gradient[i];
+            weights[i] -= step_size * temp[i];
         // printf("%f\n", weights[i]);
         }
     }
