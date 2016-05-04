@@ -62,54 +62,7 @@ void trainLogRegKernel(
     //         weights[i] -= step_size * gradient[i];
     //     // printf("%f\n", weights[i]);
     //     }
-    // }
-    
-
-
-
-    // float wx[2048];
-    // float denom[2048];
-    // float losslog[2048];
-    // float temp[2048 * 50];
-
-    // while (thread_index < batch_size) {
-    //     wx[thread_index] = 0.0;
-        
-    //     __syncthreads();
-    //     for (int i = 0; i < REVIEW_DIM; ++i) {
-    //         wx[thread_index] += weights[i] * data[thread_index * REVIEW_DIM + i];
-
-    //     }
-    //     __syncthreads();
-    //     denom[thread_index] = 1.0 + exp (data[thread_index * REVIEW_DIM + REVIEW_DIM] * wx[thread_index]);
-    //     losslog[thread_index] = log(1.0 + exp (-data[thread_index * REVIEW_DIM + REVIEW_DIM] * wx[thread_index])) / batch_size;
-    //     __syncthreads();
-    //     for (int i = 0; i < REVIEW_DIM; ++i) {
-    //         temp[thread_index * REVIEW_DIM + i] = -data[thread_index * REVIEW_DIM + REVIEW_DIM] * data[thread_index * REVIEW_DIM + i] / denom[thread_index] / batch_size;
-    //     }
-    //     __syncthreads();
-    //     thread_index += gridDim.x * blockDim.x;
-    // }
-
-    // int l = batch_size;
-    // while (l > 1) {
-    //     l /= 2;
-    //     for (int j = 0; j < REVIEW_DIM; ++j) {
-    //         if (thread_index < l) {
-    //             temp[thread_index * REVIEW_DIM + j] = \
-    //                 temp[thread_index * REVIEW_DIM + j] + temp[(thread_index + l) * REVIEW_DIM + j];
-    //         }
-    //     }
-    //     if (thread_index < l) {
-    //         losslog[thread_index] += losslog[thread_index + l];
-    //     }
-    //     __syncthreads();
-    // }
-
-    // for (int i = 0; i < REVIEW_DIM; ++i) {
-    //     weights[i] = weights[i] - step_size * temp[i];
-    // }
-    // *errors = 1.0;    
+   
 }
 
 /*
