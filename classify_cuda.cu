@@ -46,7 +46,7 @@ void trainLogRegKernel(
                 data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
             atomicAdd(&gradient[i], temp);      
         }
-        if (threadIdx.x == 0) {
+        if (threadIdx.x == 1) {
             *errors = er / batch_size;
         }
         
