@@ -138,7 +138,7 @@ void classify(istream& in_stream, int batch_size) {
             host_error[1] = cudaClassify(dev_data[1], batch_size, 1.0, dev_weights, s[1]);
             review_idx = 0;
             //      D->H all in a stream
-            printf("error rate at stream 0: %f\n", host_error[0]);
+            printf("error rate at stream 0: %f\n", host_error[1]);
             // flag = 1;
         }
 
