@@ -37,6 +37,7 @@ void trainLogRegKernel(
         }
         if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
             atomicAdd(&er, 1.0);
+            printf("%f\n", er);
         }
         // printf("wx: %f\n", wx);
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
