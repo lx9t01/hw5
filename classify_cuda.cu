@@ -28,7 +28,7 @@ void trainLogRegKernel(
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     // printf("thread_index: %d\n", thread_index);
     __shared__ float gradient[50];
-    __shared__ float er = 0.0;
+    __shared__ float er;
     while (thread_index < batch_size) {
         float wx = 0.0;
         for (int i = 0; i < REVIEW_DIM; ++i) {
