@@ -53,10 +53,11 @@ void trainLogRegKernel(
         //     // printf("%f\n", weights[i]);
         //     }
         // }
+        *errors = 1.0;
         thread_index += gridDim.x * blockDim.x;
     }
     if (threadIdx.x == 0) {
-        //*errors = 1.0;
+        
         // *errors = er / batch_size;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             weights[i] -= step_size * gradient[i];
@@ -87,7 +88,7 @@ float cudaClassify(
     float *d_errors;
     cudaMalloc(&d_errors, sizeof(float));
     cudaMemset(d_errors, 0, sizeof(float));
-    printf("entering kernel\n");
+    // printf("entering kernel\n");
     trainLogRegKernel<<<grid_size, block_size, shmem_bytes, stream>>>(
         data,
         batch_size,
