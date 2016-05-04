@@ -52,6 +52,8 @@ void trainLogRegKernel(
         //     // printf("%f\n", weights[i]);
         //     }
         // }
+        printf("gra: ", gradient[0]);
+        printf("\n");
         *errors = 1.0;
         thread_index += gridDim.x * blockDim.x;
     }
