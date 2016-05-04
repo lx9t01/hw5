@@ -31,11 +31,12 @@ void trainLogRegKernel(
     float losslog[2048];
     float temp[2048 * 50];
     while (thread_index < batch_size) {
-        wx[thread_index] = 0.0;
+        wx[thread_index] = 1.0;
+        printf("wx: %f\n", wx[thread_index]);
         __syncthreads();
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx[thread_index] += weights[i] * data[thread_index * REVIEW_DIM + i];
-            printf("wx: %f\n", wx[thread_index]);
+
         }
         __syncthreads();
         denom[thread_index] = 1.0 + exp (data[thread_index * REVIEW_DIM + REVIEW_DIM] * wx[thread_index]);
