@@ -17,6 +17,18 @@
  *         value of loss function over the batch or the misclassification rate
  *         in the batch to errors.
  */
+__device__ static float atomicMax(float* address, float val)
+{
+    int* address_as_i = (int*) address;
+    int old = *address_as_i, assumed;
+    do {
+        assumed = old;
+        old = ::atomicCAS(address_as_i, assumed,
+            __float_as_int(::fmaxf(val, __int_as_float(assumed))));
+    } while (assumed != old);
+    return __int_as_float(old);
+}
+
 __global__
 void trainLogRegKernel(
     float *data,
@@ -27,13 +39,16 @@ void trainLogRegKernel(
 {
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     // if (threadIdx.x == 0) printf("thread_index: %d\n", thread_index);
-    __shared__ float gradient[50];
+    // __shared__ float gradient[50];
+    __shared__ float gradient[1024];
     // __shared__ float er;
     while (thread_index < batch_size) {
         float wx = 0.0;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
         }
+        float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
+        gradient[threadIdx.x] = (-1.0/batch_size * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
         
         // printf("%f\n", wx);
         
@@ -42,14 +57,8 @@ void trainLogRegKernel(
         //     // printf("%f\n", er);
         // }
         // printf("wx: %f\n", wx);
-        float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
+        
         // float temp[50];
-        for (int i = 0; i < REVIEW_DIM; ++i) {
-            float temp = (-1.0/batch_size * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
-            atomicAdd(gradient + i, temp);      
-        }
-        *errors = 1.0;
-        return;
         // if (threadIdx.x == 0) {
         //     for (int i = 0; i < REVIEW_DIM; ++i) {
         //         weights[i] -= step_size * gradient[i];
@@ -59,6 +68,7 @@ void trainLogRegKernel(
         // printf("gra: ", gradient[0]);
         // printf("\n");
         *errors = 2.0;
+        return;
         thread_index += gridDim.x * blockDim.x;
     }
     if (threadIdx.x == 0) {
