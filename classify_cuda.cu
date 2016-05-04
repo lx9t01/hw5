@@ -34,7 +34,7 @@ void trainLogRegKernel(
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
             // it's the old prediction
         }
-        // printf("wx: %f\n", wx);
+        printf("wx: %f\n", wx);
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
         float temp[50];
         for (int i = 0; i < REVIEW_DIM; ++i) {
@@ -122,7 +122,7 @@ float cudaClassify(
     float *d_errors;
     cudaMalloc(&d_errors, sizeof(float));
     cudaMemset(d_errors, 0, sizeof(float));
-    printf("entering kernel\n");
+    // printf("entering kernel\n");
     trainLogRegKernel<<<grid_size, block_size, shmem_bytes, stream>>>(
         data,
         batch_size,
