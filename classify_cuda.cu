@@ -93,7 +93,7 @@ float cudaClassify(
     float *d_errors;
     cudaMalloc(&d_errors, sizeof(float));
     cudaMemset(d_errors, 0, sizeof(float));
-
+    printf("entering kernel\n");
     trainLogRegKernel<<<grid_size, block_size, shmem_bytes, stream>>>(
         data,
         batch_size,
