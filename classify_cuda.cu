@@ -35,10 +35,10 @@ void trainLogRegKernel(
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
             // it's the old prediction
         }
-        if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
-            atomicAdd(&er, 1.0);
-            printf("%f\n", er);
-        }
+        // if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
+        //     atomicAdd(&er, 1.0);
+        //     printf("%f\n", er);
+        // }
         // printf("wx: %f\n", wx);
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
         // float temp[50];
@@ -58,7 +58,8 @@ void trainLogRegKernel(
     }
     
     if (threadIdx.x == 0) {
-        *errors = er / batch_size;
+        *errors = 1.0;
+        // *errors = er / batch_size;
         for (int i = 0; i < REVIEW_DIM; ++i) {
             weights[i] -= step_size * gradient[i];
         // printf("%f\n", weights[i]);
