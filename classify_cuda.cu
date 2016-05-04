@@ -53,9 +53,9 @@ void trainLogRegKernel(
         //     }
         // }
         thread_index += gridDim.x * blockDim.x;
-
+        __syncthreads();
     }
-    __syncthreads();
+    
     if (threadIdx.x == 0) {
         *errors = er / batch_size;
         for (int i = 0; i < REVIEW_DIM; ++i) {
