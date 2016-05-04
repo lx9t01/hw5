@@ -27,41 +27,42 @@ void trainLogRegKernel(
 {
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     printf("thread_index: %d\n", thread_index);
-    // __shared__ float gradient[50];
-    // __shared__ float er;
-    // while (thread_index < batch_size) {
-    //     float wx = 0.0;
-    //     for (int i = 0; i < REVIEW_DIM; ++i) {
-    //         wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
-    //         // it's the old prediction
-    //     }
-    //     if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
-    //         atomicAdd(&er, 1.0);
-    //         // printf("%f\n", er);
-    //     }
-    //     // printf("wx: %f\n", wx);
-    //     float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
-    //     // float temp[50];
-    //     for (int i = 0; i < REVIEW_DIM; ++i) {
-    //         float temp = (-1.0/batch_size * \
-    //             data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
-    //         atomicAdd(&gradient[i], temp);      
-    //     }
-    //     // if (threadIdx.x == 0) {
-    //     //     for (int i = 0; i < REVIEW_DIM; ++i) {
-    //     //         weights[i] -= step_size * gradient[i];
-    //     //     // printf("%f\n", weights[i]);
-    //     //     }
-    //     // }
-    //     thread_index += gridDim.x * blockDim.x;
-    // }
-    // if (threadIdx.x == 0) {
-    //     *errors = 1.0;
-    //     // *errors = er / batch_size;
-    //     for (int i = 0; i < REVIEW_DIM; ++i) {
-    //         weights[i] -= step_size * gradient[i];
-    //     // printf("%f\n", weights[i]);
-    //     }
+    __shared__ float gradient[50];
+    __shared__ float er;
+    while (thread_index < batch_size) {
+        float wx = 0.0;
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
+            // it's the old prediction
+        }
+        if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
+            atomicAdd(&er, 1.0);
+            // printf("%f\n", er);
+        }
+        // printf("wx: %f\n", wx);
+        float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
+        // float temp[50];
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            float temp = (-1.0/batch_size * \
+                data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
+            atomicAdd(&gradient[i], temp);      
+        }
+        // if (threadIdx.x == 0) {
+        //     for (int i = 0; i < REVIEW_DIM; ++i) {
+        //         weights[i] -= step_size * gradient[i];
+        //     // printf("%f\n", weights[i]);
+        //     }
+        // }
+        thread_index += gridDim.x * blockDim.x;
+    }
+    if (threadIdx.x == 0) {
+        *errors = 1.0;
+        // *errors = er / batch_size;
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            weights[i] -= step_size * gradient[i];
+        // printf("%f\n", weights[i]);
+        }
+    }
    
 }
 
