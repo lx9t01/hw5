@@ -26,11 +26,12 @@ void trainLogRegKernel(
     float *errors)
 {
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
+    printf("thread_index: %d\n", thread_index);
     float wx[2048];
     float denom[2048];
     float losslog[2048];
     float temp[2048 * 50];
-    printf("thread_index: %d\n", thread_index);
+
     while (thread_index < batch_size) {
         wx[thread_index] = 1.0;
         
