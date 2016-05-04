@@ -35,6 +35,7 @@ void trainLogRegKernel(
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
         }
         *errors = 1.0;
+        printf("%f\n", wx);
         return;
         // if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
         //     atomicAdd(&er, 1.0);
