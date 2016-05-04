@@ -46,10 +46,6 @@ void trainLogRegKernel(
                 data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
             atomicAdd(&gradient[i], temp);      
         }
-        if (threadIdx.x == 1) {
-            *errors = er / batch_size;
-        }
-        
         // if (threadIdx.x == 0) {
         //     for (int i = 0; i < REVIEW_DIM; ++i) {
         //         weights[i] -= step_size * gradient[i];
@@ -59,8 +55,15 @@ void trainLogRegKernel(
         thread_index += gridDim.x * blockDim.x;
 
     }
+    __syncthreads();
+    if (threadIdx.x == 0) {
+        *errors = er / batch_size;
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            weights[i] -= step_size * gradient[i];
+        // printf("%f\n", weights[i]);
+        }
+    }
     
-
 
 
 
