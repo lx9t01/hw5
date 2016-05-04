@@ -62,7 +62,7 @@ void trainLogRegKernel(
     //         weights[i] -= step_size * gradient[i];
     //     // printf("%f\n", weights[i]);
     //     }
-    }
+    // }
     
 
 
