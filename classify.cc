@@ -115,7 +115,9 @@ void classify(istream& in_stream, int batch_size) {
         // TODO ok: if you have filled up a batch, copy H->D, call kernel and copy
         if ((review_idx >= batch_size - 1) && (flag == 0)) {
         // copy from host to device
+            
             gpuErrChk(cudaMemcpyAsync(dev_data[0], host_data, batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[0]));
+            printf("show me 0\n");
             host_error[0] = cudaClassify(dev_data[0], batch_size, 1.0, dev_weights, s[0]);
             review_idx = 0;
             //      D->H all in a stream
@@ -125,6 +127,7 @@ void classify(istream& in_stream, int batch_size) {
         if ((review_idx >= batch_size - 1) && (flag == 1)) {
         // copy from host to device
             gpuErrChk(cudaMemcpyAsync(dev_data[1], host_data, batch_size * (REVIEW_DIM + 1) * sizeof(float), cudaMemcpyHostToDevice, s[1]));
+            printf("show me 0\n");
             host_error[1] = cudaClassify(dev_data[1], batch_size, 1.0, dev_weights, s[1]);
             review_idx = 0;
             //      D->H all in a stream
