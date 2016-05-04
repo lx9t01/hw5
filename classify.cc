@@ -168,8 +168,9 @@ void classify(istream& in_stream, int batch_size) {
     // TODO: free all memory
     free(weights);
     gpuErrChk(cudaFree(dev_weights));
-    free(host_data);
+    
     for (int i = 0; i < REVIEW_DIM; ++i) {
+        free(host_data[i]);
         gpuErrChk(cudaFree(dev_data[i]));
     }
     
