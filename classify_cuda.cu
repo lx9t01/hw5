@@ -34,15 +34,17 @@ void trainLogRegKernel(
         for (int i = 0; i < REVIEW_DIM; ++i) {
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
         }
-        *errors = 1.0;
-        printf("%f\n", wx);
-        return;
+        
+        // printf("%f\n", wx);
+        
         // if (wx * data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] < 0) {
         //     atomicAdd(&er, 1.0);
         //     // printf("%f\n", er);
         // }
         // printf("wx: %f\n", wx);
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
+        *errors = 1.0;
+        return;
         // float temp[50];
         for (int i = 0; i < REVIEW_DIM; ++i) {
             float temp = (-1.0/batch_size * \
