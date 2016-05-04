@@ -42,7 +42,7 @@ void trainLogRegKernel(
                 data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
         }
         for (int i = 0; i < REVIEW_DIM; ++i) {
-            atomicAdd(gradient[i], temp[i]);
+            atomicAdd(&gradient[i], temp[i]);
         }
 
         thread_index += gridDim.x * blockDim.x;
