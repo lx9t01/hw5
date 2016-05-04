@@ -28,7 +28,7 @@ void trainLogRegKernel(
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     float wx[2048];
     float denom[2048];
-    __shared__ float losslog[blockDim.x];
+    float losslog[2048];
     float temp[2048 * 50];
     while (thread_index < batch_size) {
         wx[thread_index] = 0.0;
