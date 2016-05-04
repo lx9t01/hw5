@@ -26,8 +26,9 @@ void trainLogRegKernel(
     float *errors)
 {
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
-    if (threadIdx.x == 0) printf("thread_index: %d\n", thread_index);
+    // if (threadIdx.x == 0) printf("thread_index: %d\n", thread_index);
     __shared__ float gradient[50];
+    *errors = 1.0;
     // __shared__ float er;
     while (thread_index < batch_size) {
         float wx = 0.0;
@@ -54,7 +55,7 @@ void trainLogRegKernel(
         // }
         // printf("gra: ", gradient[0]);
         // printf("\n");
-        *errors = 1.0;
+        *errors = 2.0;
         thread_index += gridDim.x * blockDim.x;
     }
     if (threadIdx.x == 0) {
