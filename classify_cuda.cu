@@ -39,6 +39,9 @@ void trainLogRegKernel(
 {
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
     __shared__ float gradient[1024];
+    float temp[50];
+    *errors = 2.0;
+    return;
     while (thread_index < batch_size) {
         float wx = 0.0;
         for (int i = 0; i < REVIEW_DIM; ++i) {
@@ -78,8 +81,7 @@ void trainLogRegKernel(
         // }
         // printf("gra: ", gradient[0]);
         // printf("\n");
-        *errors = 2.0;
-        return;
+        
         thread_index += gridDim.x * blockDim.x;
     }
     if (threadIdx.x == 0) {
