@@ -43,14 +43,14 @@ void trainLogRegKernel(
         // }
         // printf("wx: %f\n", wx);
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
-        *errors = 1.0;
-        return;
         // float temp[50];
         for (int i = 0; i < REVIEW_DIM; ++i) {
             float temp = (-1.0/batch_size * \
                 data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
             atomicAdd(&gradient[i], temp);      
         }
+        *errors = 1.0;
+        return;
         // if (threadIdx.x == 0) {
         //     for (int i = 0; i < REVIEW_DIM; ++i) {
         //         weights[i] -= step_size * gradient[i];
