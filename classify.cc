@@ -84,10 +84,10 @@ void classify(istream& in_stream, int batch_size) {
     //       host & device. allocate and initialize streams
     float* weights = (float*) malloc (REVIEW_DIM * sizeof(float));
     gaussianFill (weights, REVIEW_DIM);
-    printf("original weights:\n");
-    for (int i = 0; i < REVIEW_DIM; ++i) {
-        printf("%f ", weights[i]);
-    }
+    // printf("original weights:\n");
+    // for (int i = 0; i < REVIEW_DIM; ++i) {
+    //     printf("%f ", weights[i]);
+    // }
     printf("\n");
     float* dev_weights;
     gpuErrChk(cudaMalloc((void**)&dev_weights, REVIEW_DIM * sizeof(float)));
@@ -139,7 +139,7 @@ void classify(istream& in_stream, int batch_size) {
     }
     gpuErrChk(cudaMemcpy(weights, dev_weights, REVIEW_DIM * sizeof(float), cudaMemcpyDeviceToHost));
     // TODO: print out weights
-    printf("weights:\n");
+    printf("final weights:\n");
     for (int i = 0; i < REVIEW_DIM; ++i) {
         printf("%f ", weights[i]);
     }
