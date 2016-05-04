@@ -45,7 +45,7 @@ void trainLogRegKernel(
         //     atomicAdd(&gradient[i], temp[i]);
         // }
 
-        // thread_index += gridDim.x * blockDim.x;
+        thread_index += gridDim.x * blockDim.x;
         // for (int i = 0; i < REVIEW_DIM; ++i) {
         //     weights[i] -= step_size * gradient[i];
         //     printf("%f\n", weights[i]);
