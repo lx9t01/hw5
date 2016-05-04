@@ -26,7 +26,7 @@ void trainLogRegKernel(
     float *errors)
 {
     unsigned int thread_index = blockIdx.x * blockDim.x + threadIdx.x;
-    printf("thread_index: %d\n", thread_index);
+    // printf("thread_index: %d\n", thread_index);
     __shared__ float gradient[50];
     while (thread_index < batch_size) {
         float wx = 0.0;
@@ -34,16 +34,16 @@ void trainLogRegKernel(
             wx += weights[i] * data[thread_index*(REVIEW_DIM+1)+i];
             // it's the old prediction
         }
-        printf("wx: %f\n", wx);
+        // printf("wx: %f\n", wx);
         float denom = (1 + exp(data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * wx));
         // float temp[50];
-        // for (int i = 0; i < REVIEW_DIM; ++i) {
-        //     temp[i] = (-1.0/batch_size * \
-        //         data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
-        // }
-        // for (int i = 0; i < REVIEW_DIM; ++i) {
-        //     atomicAdd(&gradient[i], temp[i]);
-        // }
+        for (int i = 0; i < REVIEW_DIM; ++i) {
+            float temp = (-1.0/batch_size * \
+                data[thread_index*(REVIEW_DIM+1)+REVIEW_DIM] * data[thread_index*(REVIEW_DIM+1)+i])/denom;
+            atomicAdd(&gradient[i], temp);      
+        }
+          
+        
 
         thread_index += gridDim.x * blockDim.x;
         // for (int i = 0; i < REVIEW_DIM; ++i) {
