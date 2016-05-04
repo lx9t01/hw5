@@ -183,6 +183,7 @@ int main(int argc, char** argv) {
     ifstream ifs(argv[1]);
     stringstream buffer;
     buffer << ifs.rdbuf();
+    printf("before classify\n");
     classify(buffer, batch_size);
 	
 	// End timer
